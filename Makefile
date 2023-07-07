@@ -17,6 +17,6 @@ image:
 	docker buildx build -o type=docker --build-arg VERSION=$(VERSION) --build-arg BUILD=$(BUILD) . -t $(REGISTRY)/$(APP):$(VERSION)
 
 ximage:
-	docker buildx create --name imagebuilder --driver=remote tcp://buildkitd-non-tls:1234 --bootstrap --use; docker buildx build -o type=registry --build-arg VERSION=$(VERSION) --build-arg BUILD=$(BUILD) --platform=$(PLATFORM) . -t $(REGISTRY)/$(APP):$(VERSION) -t $(REGISTRY)/$(APP):latest
+	docker buildx create --name imagebuilder --driver=remote tcp://buildkitd:1234 --driver-opt=cacert=/certs/ca.pem,cert=/certs/cert.pem,key=/certs/key.pem --bootstrap --use; docker buildx build -o type=registry --build-arg VERSION=$(VERSION) --build-arg BUILD=$(BUILD) --platform=$(PLATFORM) . -t $(REGISTRY)/$(APP):$(VERSION) -t $(REGISTRY)/$(APP):latest
 
 .PHONY: proto image ximage
