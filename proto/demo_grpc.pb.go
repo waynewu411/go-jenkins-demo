@@ -22,6 +22,7 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type DemoClient interface {
+	Healthz(ctx context.Context, in *HealthzRequest, opts ...grpc.CallOption) (*HealthzResponse, error)
 	Echo(ctx context.Context, in *EchoRequest, opts ...grpc.CallOption) (*EchoResponse, error)
 }
 
@@ -31,6 +32,15 @@ type demoClient struct {
 
 func NewDemoClient(cc grpc.ClientConnInterface) DemoClient {
 	return &demoClient{cc}
+}
+
+func (c *demoClient) Healthz(ctx context.Context, in *HealthzRequest, opts ...grpc.CallOption) (*HealthzResponse, error) {
+	out := new(HealthzResponse)
+	err := c.cc.Invoke(ctx, "/demo.Demo/Healthz", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
 }
 
 func (c *demoClient) Echo(ctx context.Context, in *EchoRequest, opts ...grpc.CallOption) (*EchoResponse, error) {
@@ -46,6 +56,7 @@ func (c *demoClient) Echo(ctx context.Context, in *EchoRequest, opts ...grpc.Cal
 // All implementations must embed UnimplementedDemoServer
 // for forward compatibility
 type DemoServer interface {
+	Healthz(context.Context, *HealthzRequest) (*HealthzResponse, error)
 	Echo(context.Context, *EchoRequest) (*EchoResponse, error)
 	mustEmbedUnimplementedDemoServer()
 }
@@ -54,6 +65,9 @@ type DemoServer interface {
 type UnimplementedDemoServer struct {
 }
 
+func (UnimplementedDemoServer) Healthz(context.Context, *HealthzRequest) (*HealthzResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Healthz not implemented")
+}
 func (UnimplementedDemoServer) Echo(context.Context, *EchoRequest) (*EchoResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Echo not implemented")
 }
@@ -68,6 +82,24 @@ type UnsafeDemoServer interface {
 
 func RegisterDemoServer(s grpc.ServiceRegistrar, srv DemoServer) {
 	s.RegisterService(&Demo_ServiceDesc, srv)
+}
+
+func _Demo_Healthz_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(HealthzRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DemoServer).Healthz(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/demo.Demo/Healthz",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DemoServer).Healthz(ctx, req.(*HealthzRequest))
+	}
+	return interceptor(ctx, in, info, handler)
 }
 
 func _Demo_Echo_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
@@ -95,6 +127,10 @@ var Demo_ServiceDesc = grpc.ServiceDesc{
 	ServiceName: "demo.Demo",
 	HandlerType: (*DemoServer)(nil),
 	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "Healthz",
+			Handler:    _Demo_Healthz_Handler,
+		},
 		{
 			MethodName: "Echo",
 			Handler:    _Demo_Echo_Handler,

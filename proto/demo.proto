@@ -4,6 +4,13 @@ option go_package = "./";
 
 import "google/api/annotations.proto";
 
+message HealthzRequest {
+}
+
+message HealthzResponse {
+
+}
+
 message EchoRequest {
     string request = 1;
 }
@@ -13,6 +20,12 @@ message EchoResponse {
 }
 
 service Demo {
+    rpc Healthz(HealthzRequest) returns (HealthzResponse) {
+        option (google.api.http) = {
+            get: "/demo/healthz"
+          };
+    }
+
     rpc Echo(EchoRequest) returns (EchoResponse) {
         option (google.api.http) = {
             post: "/demo/echo"

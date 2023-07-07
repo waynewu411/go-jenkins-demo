@@ -2,7 +2,6 @@ package service
 
 import (
 	"context"
-	"log"
 
 	pb "github.com/waynewu411/go-jenkins-demo/proto"
 )
@@ -15,7 +14,10 @@ func newDemoServer() *DemoServer {
 	return &DemoServer{}
 }
 
+func (srv *DemoServer) Healthz(ctx context.Context, request *pb.HealthzRequest) (*pb.HealthzResponse, error) {
+	return &pb.HealthzResponse{}, nil
+}
+
 func (srv *DemoServer) Echo(ctx context.Context, request *pb.EchoRequest) (*pb.EchoResponse, error) {
-	log.Printf("-> %v", request)
 	return &pb.EchoResponse{Response: request.Request}, nil
 }
