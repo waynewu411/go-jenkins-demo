@@ -38,7 +38,8 @@ pipeline {
       steps {
         container('docker') {
           sh 'ls'
-          sh 'echo $CONTAINER_REGISTRY_CREDENTIALS_PSW | docker login --username $CONTAINER_REGISTRY_CREDENTIALS_USR --password-stdin && make ximage VERSION=buildkit'
+          sh 'echo $CONTAINER_REGISTRY_CREDENTIALS_PSW | docker login --username $CONTAINER_REGISTRY_CREDENTIALS_USR --password-stdin'
+          sh 'make ximage VERSION=buildkit'
         }
       }
     }
