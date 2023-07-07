@@ -1,13 +1,22 @@
 package main
 
-import "github.com/gin-gonic/gin"
+import (
+	"log"
+
+	"github.com/waynewu411/go-jenkins-demo/service"
+)
+
+var (
+	Version string = "latest"
+	Build   string = ""
+)
+
+func logVersionAndBuild() {
+	log.Printf("demo, version: %v, build: %v", Version, Build)
+}
 
 func main() {
-	r := gin.Default()
-	r.GET("/ping", func(c *gin.Context) {
-		c.JSON(200, gin.H{
-			"message": "pong",
-		})
-	})
-	r.Run() // listen and serve on 0.0.0.0:8080
+	logVersionAndBuild()
+
+	service.StartDemoService()
 }
