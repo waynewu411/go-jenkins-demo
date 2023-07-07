@@ -7,8 +7,8 @@ RUN protoc --experimental_allow_proto3_optional \
         --go_out=proto --go_opt=paths=source_relative \
         --go-grpc_out=proto --go-grpc_opt=paths=source_relative \
         --grpc-gateway_out=proto --grpc-gateway_opt=paths=source_relative --grpc-gateway_opt=allow_delete_body=true \
-        --proto_path=cronus-proto \
-        webapp/v1/webapp.proto webapp/v1/errors.proto webapp/v1/entitlement.proto webapp/v1/catalog.proto webapp/v1/category.proto  webapp/v1/credits.proto webapp/v1/accountuser.proto webapp/v1/account.proto && \
+        --proto_path=proto \
+        proto/demo.proto && \
         go mod download && go build -ldflags "-X 'main.Version=$VERSION' -X 'main.Build=$BUILD'" -o app
 
 FROM alpine
