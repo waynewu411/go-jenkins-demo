@@ -1,4 +1,4 @@
-FROM qsruluru.azurecr.io/go-builder:1.19-1.2 AS builder
+FROM docker.io/waynewu411/go-builder:1.19-1.0 AS builder
 ARG VERSION=latest
 ARG BUILD
 WORKDIR /build
