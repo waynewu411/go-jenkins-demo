@@ -1,0 +1,47 @@
+pipeline {
+
+  environment {
+    CONTAINER_REGISTRY_CREDENTIALS = credentials('dockerhub')
+  }
+
+  agent {
+    kubernetes {
+      yaml '''
+        apiVersion: v1
+        kind: Pod
+        spec:
+          containers:
+          - name: docker
+            image: docker.io/waynewu411/docker-cli:1.0
+            command:
+            - cat
+            tty: true
+            volumeMounts:
+            - name: certs
+              readOnly: true
+              mountPath: /certs
+          - name: go-builder
+            image: docker.io/waynewu411/go-builder:1.19-1.0
+            command:
+            - cat
+            tty: true
+          volumes:
+          - name: certs
+            secret:
+                secretName: buildkit-client-certs
+        '''
+    }
+  }
+
+  stages {
+    stage('build') {
+      steps {
+        container('docker') {
+          sh 'ls'
+          sh 'echo $CONTAINER_REGISTRY_CREDENTIALS_PSW | docker login docker.io/waynewu411 --username $CONTAINER_REGISTRY_CREDENTIALS_USR --password-stdin'
+          sh 'make ximage VERSION=buildkit'
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,26 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: jenkins-pv
+spec:
+  storageClassName: jenkins-sc
+  capacity:
+    storage: 10Gi
+  accessModes:
+  - ReadWriteMany
+  nfs:
+    server: k3sdev
+    path: /data/jenkins
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: jenkins-pvc
+  namespace: jenkins
+spec:
+  storageClassName: jenkins-sc
+  resources:
+    requests:
+      storage: 10Gi
+  accessModes:
+  - ReadWriteMany
