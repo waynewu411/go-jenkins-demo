@@ -1,4 +1,4 @@
-APP=demo
+APP=go-jenkins-demo
 VERSION?=latest
 BUILD?=$(shell /bin/date +%Y%m%d%H%M%S)
 PLATFORM?=linux/amd64,linux/arm64
