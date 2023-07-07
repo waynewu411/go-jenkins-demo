@@ -2,10 +2,10 @@ APP=go-jenkins-demo
 VERSION?=latest
 BUILD?=$(shell /bin/date +%Y%m%d%H%M%S)
 PLATFORM?=linux/amd64,linux/arm64
-REGISTRY?=docker.io/waynewu411
+REGISTRY?=waynewu411
 
 proto:
-	docker run --rm -it -v "$(PWD)":/app docker.io/waynewu411/go-builder:1.19-1.0 sh -c \
+	docker run --rm -it -v "$(PWD)":/app waynewu411/go-builder:1.19-1.0 sh -c \
 	"cd /app && rm -f proto/*.go && \
 		protoc --go_out=proto --go_opt=paths=source_relative \
 			--go-grpc_out=proto --go-grpc_opt=paths=source_relative \
