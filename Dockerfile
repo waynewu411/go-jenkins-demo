@@ -16,9 +16,7 @@ ARG USER_NAME=docker
 ARG USER_UID=1001
 ARG USER_GROUP=$USER_NAME
 ARG USER_GID=$USER_UID
-RUN apk add --no-cache tzdata
-ENV TZ=Australia/Melbourne
-EXPOSE 50051 50052 50053
+EXPOSE 8080 50050
 COPY --from=builder /build/app /app
 RUN addgroup -S $USER_GROUP -g $USER_GID && \
     adduser -S -G $USER_GROUP -u $USER_GID $USER_NAME && \

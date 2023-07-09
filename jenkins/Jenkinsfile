@@ -20,11 +20,6 @@ pipeline {
             - name: certs
               readOnly: true
               mountPath: /certs
-          - name: go-builder
-            image: waynewu411/go-builder:1.19-1.0
-            command:
-            - cat
-            tty: true
           volumes:
           - name: certs
             secret:
@@ -44,4 +39,5 @@ pipeline {
       }
     }
   }
+  
 }
