@@ -1,0 +1,108 @@
+pipeline {
+
+  environment {
+    CONTAINER_REGISTRY_CREDENTIALS = credentials('dockerhub')
+    REPO_URL = "${env.repo_url}"
+    REF = "${env.ref}"
+    BRANCH = REF.replaceAll('^refs/heads/', '')
+    RELEASE = BRANCH.replaceAll('^.*/', '')
+    VERSION = RELEASE.replaceAll('^v', '')
+  }
+  
+  triggers {
+    GenericTrigger(
+      genericVariables: [
+        [key: 'ref', value: '$.ref'],
+        [key: 'before', value: '$.before'],
+        [key: 'after', value: '$.after'],
+        [key: 'repo_url', value: '$.repository.url'],
+      ],
+      causeString: 'Triggered By Gitlab On $ref',
+      token: 'gojenkinsdemorelease',
+      tokenCredentialId: '',
+      printContributedVariables: true,
+      printPostContent: true,
+      silentResponse: false,
+    )
+  }
+
+  agent {
+    kubernetes {
+      yaml '''
+        apiVersion: v1
+        kind: Pod
+        spec:
+          containers:
+          - name: docker
+            image: waynewu411/docker-cli:1.0
+            command:
+            - cat
+            tty: true
+            volumeMounts:
+            - name: certs
+              readOnly: true
+              mountPath: /certs
+          volumes:
+          - name: certs
+            secret:
+                secretName: buildkit-client-certs
+        '''
+    }
+  }
+
+  stages {
+    stage('scm') {
+      steps {
+        script{
+          git branch: BRANCH,
+            credentialsId: 'gitlab',
+            url: REPO_URL
+        }
+      }
+    }
+    
+    stage('pre-build') {
+      steps {
+        container('docker') {
+          sh 'ls'
+        }
+      }
+    }
+
+    stage('build') {
+      steps {
+        container('docker') {
+          script {
+            sh '''
+              echo $CONTAINER_REGISTRY_CREDENTIALS_PSW | docker login --username $CONTAINER_REGISTRY_CREDENTIALS_USR --password-stdin
+              make ximage VERSION=$VERSION
+            '''
+          }
+        }
+      }
+    }
+    
+    stage('post-build') {
+      steps {
+        script {
+          withCredentials([
+            sshUserPrivateKey(
+              credentialsId: 'gitlab',
+              keyFileVariable: 'SSH_PRIVATE_KEY',
+              passphraseVariable: '',
+              usernameVariable: 'SSH_USERNAME'
+            )
+          ]) {
+            sh '''
+              git config user.name "${SSH_USERNAME}"
+              git config user.email "${SSH_USERNAME}"
+              GIT_SSH_COMMAND="ssh -o StrictHostKeyChecking=no -i ${SSH_PRIVATE_KEY}" git tag -a $RELEASE -m "${RELEASE}"
+              GIT_SSH_COMMAND="ssh -o StrictHostKeyChecking=no -i ${SSH_PRIVATE_KEY}" git push origin --tags
+            '''
+          }
+        }
+      }
+    }
+  }
+  
+}

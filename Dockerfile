@@ -1,4 +1,4 @@
-FROM waynewu411/go-builder:1.19-1.0 AS builder
+FROM waynewu411/go-builder:1.19-1.1 AS builder
 ARG VERSION=latest
 ARG BUILD
 WORKDIR /build
