@@ -20,6 +20,9 @@ pipeline {
       causeString: 'Triggered By Gitlab On $ref',
       token: 'gojenkinsdemorelease',
       tokenCredentialId: '',
+      /// filter the deletion of release branch
+      regexpFilterText: '$after',
+      regexpFilterExpression: '^(?!0000000000000000000000000000000000000000$).*$',
       printContributedVariables: true,
       printPostContent: true,
       silentResponse: false,
