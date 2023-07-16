@@ -37,7 +37,7 @@ pipeline {
         spec:
           containers:
           - name: docker
-            image: waynewu411/docker-cli:1.0
+            image: waynewu411/docker-cli:1.1
             command:
             - cat
             tty: true
@@ -85,7 +85,7 @@ pipeline {
       }
     }
     
-    stage('post-build') {
+    stage('create-release-tag') {
       steps {
         script {
           withCredentials([
@@ -106,6 +106,30 @@ pipeline {
         }
       }
     }
+
+    stage('notify-cd-pipeline') {
+      steps {
+        script {
+          withCredentials([
+            string(
+              credentialsId: 'argocd-auth-token',
+              variable: 'ARGOCD_AUTH_TOKEN'
+            )
+          ]) {
+            container('docker'){
+              sh '''
+                # Trigger CD Pipeline in Argocd
+                export ARGOCD_SERVER='argocd-server.argocd.svc.cluster.local'
+                export ARGOCD_AUTH_TOKEN=$ARGOCD_AUTH_TOKEN
+                argocd app sync --insecure argocd/go-jenkins-demo
+                argocd app wait --insecure argocd/go-jenkins-demo
+              '''
+            }
+          }
+        }
+      }
+    }
+
   }
   
 }
